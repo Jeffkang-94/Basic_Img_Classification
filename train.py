@@ -19,6 +19,7 @@ parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
 parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
 parser.add_argument('--batch_size', default=512, type=int, help='size of batch')
 parser.add_argument('--resume', '-r', action='store_true', help='resume from checkpoint')
+parser.add_argument('--name', type=str, help='name of trial')
 args = parser.parse_args()
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -78,7 +79,10 @@ if args.resume:
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
 optimizer_lr = optim.lr_scheduler.MultiStepLR(optimizer=optimizer, milestones=[60,120,180], gamma=0.1)
-
+checkpoint_path = args.name
+if not os.path.isdir(args.name):
+    os.mkdir(os.path.join('checkpoint',args.name))
+f = open(os.path.join('checkpoint',checkpoint_path, "log.txt"),"a")
 # Training
 def train(epoch):
     print('\nEpoch: %d' % epoch)
@@ -101,6 +105,8 @@ def train(epoch):
 
         progress_bar(batch_idx, len(trainloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
+    
+        
     optimizer_lr.step()
 
 def test(epoch):
@@ -125,6 +131,8 @@ def test(epoch):
 
     # Save checkpoint.
     acc = 100.*correct/total
+    f.write('Epoch[%d] Test Acc : %.3f%% (%d/%d)' %(epoch, acc, correct, total))
+    f.flush()
     if acc > best_acc:
         print('Saving..')
         state = {
@@ -132,13 +140,13 @@ def test(epoch):
             'acc': acc,
             'epoch': epoch,
         }
-        if not os.path.isdir('checkpoint'):
-            os.mkdir('checkpoint')
-        torch.save(state, './checkpoint/checkpoint.pth')
+        
+        torch.save(state, os.path.join('checkpoint',checkpoint_path,'checkpoint.pth'))
         best_acc = acc
 
 
 for epoch in range(start_epoch, start_epoch+201):
     train(epoch)
     test(epoch)
+f.close()
 
