@@ -13,7 +13,10 @@ You can modify the **train.sh** file to adjust the value of each parameter.
 bash train.sh
 ```
 ```bash
-
+CUDA_VISIBLE_DEVICES=0 python train.py \
+                    --lr 0.1 \
+                    --batch_size 512 \
+                    --name vgg16
 ```
 
 # Experiments
