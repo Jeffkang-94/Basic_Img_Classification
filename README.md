@@ -1,4 +1,4 @@
-# Basic Img Classification(
+# Basic Img Classification(Tutorial Code)
 
 This is a repository to study the basic image classification.
 Especially, we consider CIFAR-10 to deal with image classification task.
